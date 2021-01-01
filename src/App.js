@@ -30,16 +30,16 @@ function App() {
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
       setId(user.uid) 
-      firebase.database().ref(`users/${firebase.auth().currentUser.uid}`).on('value', data => {
+      firebase.database().ref(`users/${firebase.auth().currentUser.uid}`).on('value', data => {    // Updating data from DB
         if(w >= targetW) setMobSec(data.val().mobTime)
         if(w<targetW) setSec(data.val().time)
         setUName(data.val().username)
       })   
     }
-     else setId(null)
+    else setId(null)
   })
   
-  const setUsers = {
+  const setUsers = {        // Tracking user`s actions with forms
       
     logIn(email, password){
       firebase.auth().signInWithEmailAndPassword(email, password)
@@ -51,11 +51,9 @@ function App() {
         document.getElementById("logForm").reset(),
       )
     },
-    logOut(){
-      firebase.auth().signOut()
-      // document.getElementById("logForm").reset()
-      // document.getElementById("regForm").reset()
-    },
+
+    logOut(){firebase.auth().signOut()},
+
     signUp(email, password, name){
       firebase.auth()
       .createUserWithEmailAndPassword(email, password)
@@ -63,17 +61,16 @@ function App() {
           username: name,
           time: 0,
           mobTime: 0
-        }),
-          setMobSec(0),
-          setSec(0)
+          }),
+        setMobSec(0),
+        setSec(0)
       )
       document.getElementById("regForm").reset()
     } 
   }
 
-  const form = () => {
-    
-      return (
+  const form = () => {          // Form`s layouts 
+    return (
       <div>
         <div className="regForm hidden">
           <h4>Register</h4>
@@ -98,40 +95,42 @@ function App() {
         </div>
 
         <div className="loginForm">
-        <h4>Log in</h4>
-        <form className="login" id='logForm'
-          onSubmit={event => {
-            event.preventDefault()
-            setUsers.logIn(document.getElementById('lEmail').value, document.getElementById('lPassword').value)
-          }} >
-          <input type="email" id="lEmail" className="email" placeholder="Email" />
-          <input type="password" id="lPassword" className="password" placeholder="Password" pattern="\w{8,}" title="8 character password" />
-          <input className="input-btn" type="submit" value="Login" form='logForm'/> 
-        </form>
-        <a className="input-link" href="#" 
-          onClick={() => {
-                        document.querySelector('.loginForm').classList.toggle('hidden')
-                        document.querySelector('.regForm').classList.toggle('hidden')
-          }}>Don`t have an account yet? <b>Register</b></a>
+          <h4>Log in</h4>
+          <form className="login" id='logForm'
+            onSubmit={event => {
+              event.preventDefault()
+              setUsers.logIn(document.getElementById('lEmail').value, document.getElementById('lPassword').value)
+            }} >
+            <input type="email" id="lEmail" className="email" placeholder="Email" />
+            <input type="password" id="lPassword" className="password" placeholder="Password" pattern="\w{8,}" title="8 character password" />
+            <input className="input-btn" type="submit" value="Login" form='logForm'/> 
+          </form>
+          <a className="input-link" href="#" 
+            onClick={() => {
+                          document.querySelector('.loginForm').classList.toggle('hidden')
+                          document.querySelector('.regForm').classList.toggle('hidden')
+            }}>Don`t have an account yet? <b>Register</b></a>
+        </div>
       </div>
-    </div>)
-    }
+    )
+  }
 
   let w = document.documentElement.clientWidth || document.body.clientWidth || window.innerWidth
   let targetW = 768;
 
-  useEffect(() => {
+  useEffect(() => {        // Tracking time in dependence of device
     let interval
     interval = w >= targetW ? 
       setInterval(() => setSec(prev => prev + 1), 1000) : 
       setInterval(() => setMobSec(prev => prev + 1), 1000)
     return () => clearInterval(interval);
   });
+
   let h = 0,
-  m = 0,
-  sec = 0
+      m = 0,
+      sec = 0
   
-  const updateTime = () => {
+  const updateTime = () => {    // Updating time to DB
     var updates = {};
     w >= targetW ? 
       updates['users/' + id + '/time/'] = s :
@@ -141,18 +140,18 @@ function App() {
   const updateTimeToDB = useMemo(() => updateTime(), [s, mobS])
   
   const formatTime = (s) => {
-      sec = s%60 
-      m = ~~(s/60%60)
-      h = ~~(s/3600)
+    sec = s%60 
+    m = ~~(s/60%60)
+    h = ~~(s/3600)
 
-      sec = sec < 10 ? `0${sec}` : sec
-      m = m < 10 ? `0${m}` : m
-      h = h < 10 ? `0${h}` : h
-      
-      return `${h}:${m}:${sec}`
+    sec = sec < 10 ? `0${sec}` : sec
+    m = m < 10 ? `0${m}` : m
+    h = h < 10 ? `0${h}` : h
+    
+    return `${h}:${m}:${sec}`
   }
   
-  const timers = () => {
+  const timers = () => {    // Layout for page with stopwatches
     return (
       <div>
         <div className='header'>
